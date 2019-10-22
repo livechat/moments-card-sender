@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Moments card sender</title>
+
+  <!-- Sign in with LiveChat SDK-->
+  <script src="https://cdn.livechatinc.com/accounts/accounts-sdk.min.js"></script>
+
+  <!-- LiveChat Agent App SDK-->
+  <script src="https://unpkg.com/@livechat/agent-app-sdk@latest/dist/agentapp.umd.min.js"></script>
+
+
+</head>
+
+<body>
+
+  <!-- Sign in with LiveChat Button -->
+  <a href="" onclick="instance.openPopup()">
+    <div id="livechat-login-button" class="livechat-login-button"></div>
+  </a>
+
+  <!-- Obtaining data about an authorized user -->
+  <script>
+    var access_token;
+    const instance = AccountsSDK.init({                                                   // initiates the SDK and returns the accountsSdk object instance
+      client_id: "280a9992a0234fca80320d7add8ea939",                                      // obtained from the Developers Console when you create your app
+      onIdentityFetched: (error, data) => {                                               // the callback executed when user's identity is fetched
+        if (data) {
+          console.log("User authorized!");                                                // in console, shows information about user being authorized (optional)
+          document.getElementById("livechat-login-button").style.display = "none";        // hides the Sign in with LiveChat button
+          document.getElementById("livechat-widget-form").style.display = "block";        // shows the form for sending a card
+          console.log("License number: " + data.license);                                 // shows the user's license number in console (optional)
+          access_token = data.access_token;                                               // sets access_token
+          console.log(access_token);
+          console.log(error);                                                             // shows errors in console (optional)
+        }
+      }
+    });
+  </script>
+
+
+  <!-- Sending rich message via the Agent Chat API -->
+  <script>
+    function richMessage() {
+      var rmURL = document.getElementsByName("rmURL")[0].value;                       // creating variable for a URL
+      var rmIMAGE = document.getElementsByName("rmIMAGE")[0].value;                   // creating variable for a image URL
+      var rmBUTTON = document.getElementsByName("rmBUTTON")[0].value;                 // creating variable for a button text
+      var rmTITLE = document.getElementsByName("rmTITLE")[0].value;                   // creating variable for a title
+      var rmSUBTITLE = document.getElementsByName("rmSUBTITLE")[0].value;             // creating variable for a subtitle
+
+      var obj = {
+
+        "chat_id": chat_id,
+        "event": {                                      // fields required for the "rich message" event, more info: https://developers.livechatinc.com/docs/messaging/agent-chat-api/
+          "type": "rich_message",
+          "recipients": "all",
+          "template_id": "cards",
+          "elements": [
+            {
+              "title": rmTITLE,
+              "subtitle": rmSUBTITLE,
+              "image": {
+                "url": rmIMAGE
+              },
+              "buttons": [
+                {
+                  "text": rmBUTTON,
+                  "type": "webview",
+                  "value": rmURL,
+                  "webview_height": "full",
+                  "postback_id": "action_yes",
+                  "user_ids": []
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      var myJSON = JSON.stringify(obj);
+
+
+      var xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          console.log(this.responseText);
+        }
+      });
+
+      xhr.open("POST", "https://api.livechatinc.com/v3.1/agent/action/send_event");
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+
+      xhr.send(myJSON);
+    };
+  </script>
+
+
+
+  <!-- Obtaining chat_id data using Agent App SDK -->
+  <script>
+    LiveChat.createDetailsWidget().then(function (widget) {         // returns a promise resolving to a Details widget instance
+      widget.on("customer_profile", data => {                       // condition that is emitted when an agent opens a conversation within Chats
+        console.log(data),                                          // shows customer data in console (optional)
+          chat_id = data.chat.chat_id;                              // sets chat_id
+      });
+    });
+  </script>
+
+
+
+  <!-- Form for sending the card -->
+  <!-- Form is hidden by default (until the user is authorized)-->
+  <form id="livechat-widget-form" style="display:none">
+
+    <h2>Send link to your customer</h2>
+    Fill fields with link to your website and to your image.
+
+    </br>
+    URL
+    </br>
+    <input type="text" value="" name="rmURL" placeholder="URL..." />
+
+    </br>
+    Image URL
+    </br>
+    <input type="text" value="" name="rmIMAGE" placeholder="Image URL..." />
+
+    </br>
+    Title
+    </br>
+    <input type="text" value="" name="rmTITLE" placeholder="Title..." />
+
+    </br>
+    Subtitle
+    </br>
+    <input type="text" value="" name="rmSUBTITLE" placeholder="Subtitle..." />
+
+    </br>
+    Button text
+    </br>
+    <input type="text" value="" name="rmBUTTON" placeholder="Button text..." />
+
+    </br>
+    <!-- The button that sends rich message via the Agent Chat API using data from form above -->
+    <input type="button" onclick="richMessage()" value="Send to customer">
+  </form>
+
+
+
+</body>
+
+</html>
