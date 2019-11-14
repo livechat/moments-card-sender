@@ -4,6 +4,8 @@
 <head>
   <meta charset="utf-8">
   <title>Moments card sender</title>
+  <!-- Axios library for API calls -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
   <!-- Sign in with LiveChat SDK-->
   <script src="https://cdn.livechatinc.com/accounts/accounts-sdk.min.js"></script>
@@ -21,35 +23,44 @@
 
   <!-- Sending rich message via Agent Chat API -->
   <script>
-    function richMessage() {
-      var rmURL = document.getElementsByName("rmURL")[0].value;
-      var rmIMAGE = document.getElementsByName("rmIMAGE")[0].value;
-      var rmBUTTON = document.getElementsByName("rmBUTTON")[0].value;
-      var rmTITLE = document.getElementsByName("rmTITLE")[0].value;
-      var rmSUBTITLE = document.getElementsByName("rmSUBTITLE")[0].value;
+    const richMessage = () => {
+      // creating variable for a URL
+      const rmURL = document.getElementsByName("rmURL")[0].value;
 
-      var obj = {
+      // creating variable for a image URL
+      const rmIMAGE = document.getElementsByName("rmIMAGE")[0].value;
 
-        "chat_id": chat_id,
-        "event": {
-          "type": "rich_message",
-          "recipients": "all",
-          "template_id": "cards",
-          "elements": [
+      // creating variable for a button text
+      const rmBUTTON = document.getElementsByName("rmBUTTON")[0].value;
+
+      // creating variable for a title
+      const rmTITLE = document.getElementsByName("rmTITLE")[0].value;
+
+      // creating variable for a subtitle
+      const rmSUBTITLE = document.getElementsByName("rmSUBTITLE")[0].value;
+
+      // fields required for the "rich message" event, more info: https://developers.livechatinc.com/docs/messaging/agent-chat-api/
+      const payload = {
+        chat_id: chat_id,
+        event: {
+          type: "rich_message",
+          recipients: "all",
+          template_id: "cards",
+          elements: [
             {
-              "title": rmTITLE,
-              "subtitle": rmSUBTITLE,
-              "image": {
-                "url": rmIMAGE
+              title: rmTITLE,
+              subtitle: rmSUBTITLE,
+              image: {
+                url: rmIMAGE
               },
-              "buttons": [
+              buttons: [
                 {
-                  "text": rmBUTTON,
-                  "type": "webview",
-                  "value": rmURL,
-                  "webview_height": "full",
-                  "postback_id": "action_yes",
-                  "user_ids": []
+                  text: rmBUTTON,
+                  type: "webview",
+                  value: rmURL,
+                  webview_height: "full",
+                  postback_id: "action_yes",
+                  user_ids: []
                 }
               ]
             }
@@ -57,24 +68,26 @@
         }
       };
 
-      var myJSON = JSON.stringify(obj);
+      // send POST request to LiveChat API
+      axios.post('https://api.livechatinc.com/v3.1/agent/action/send_event',
 
-
-      var xhr = new XMLHttpRequest();
-      xhr.withCredentials = true;
-
-      xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          console.log(this.responseText);
+        // payload sent as body of the request
+        payload,
+        {
+          // required headers for the request
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + access_token
+          }
         }
-      });
-
-      xhr.open("POST", "https://api.livechatinc.com/v3.1/agent/action/send_event");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.setRequestHeader("Authorization", "Bearer " + access_token);
-
-      xhr.send(myJSON);
-    };
+      )
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   </script>
 
 
