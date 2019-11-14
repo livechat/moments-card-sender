@@ -27,7 +27,7 @@
     // initiates the SDK and returns the accountsSdk object instance
     const instance = AccountsSDK.init({
       // obtained from the Developers Console when you create your app
-      client_id: "04b98ba24fc4426a0a046cf955dfd796",
+      client_id: "your_client_id",
 
       // the callback executed when user's identity is fetched
       onIdentityFetched: (error, data) => {
@@ -126,6 +126,7 @@
     }
   </script>
 
+
   <!-- Obtaining chat_id data using Agent App SDK -->
   <script>
     // returns a promise resolving to a Details widget instance
@@ -139,6 +140,7 @@
       });
     });
   </script>
+
 
   <!-- Form for sending the card -->
   <!-- Form is hidden by default (until the user is authorized)-->
